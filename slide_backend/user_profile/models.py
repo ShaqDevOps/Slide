@@ -6,9 +6,12 @@ from django.utils import timezone
 class Profile(models.Model):
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='profile')
+    bio = models.CharField(max_length=150, blank=True, null=True)
     profile_picture = models.ImageField(
         upload_to='profile_pictures/', blank=True, null=True)
     state = models.CharField(max_length=50, blank=True, null=True)
+    # location = models.CharField(max_length=100, blank=True, null=True)
+
     website = models.URLField(blank=True, null=True)
     followers = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="following", blank=True)

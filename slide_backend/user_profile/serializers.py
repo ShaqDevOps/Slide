@@ -8,7 +8,10 @@ User = get_user_model()
 
 
 class ProfileSerializer(serializers.ModelSerializer):
-    user = serializers.StringRelatedField(read_only=True)
+    email = serializers.EmailField(source='user.email', read_only=True)
+    username = serializers.CharField(source='user.username', read_only=True)
+    name = serializers.CharField(source='user.name', read_only=True)
+    id = serializers.IntegerField(source='user.id', read_only=True)
     followers = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     blocked_users = serializers.PrimaryKeyRelatedField(
         many=True, read_only=True)
@@ -16,10 +19,13 @@ class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = [
-            'user',
+            'id',
+            'username',
+            'name',
             'bio',
             'profile_picture',
-            'location',
+            'email',
+            # 'location',
             'website',
             'followers',
             'created_at',

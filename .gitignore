@@ -1,0 +1,41 @@
+# Python files
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments
+env/
+venv/
+
+# Environment variables and credentials
+*.env
+.env.*
+sample_tokens.txt
+secrets.json
+
+# Django-specific
+*/migrations/
+media/
+staticfiles/
+
+# Logs and debug files
+*.log
+debug.log
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Build files
+build/
+dist/
+*.egg-info/
+
+# Node.js
+node_modules/
+
+# Testing
+.coverage
+htmlcov/

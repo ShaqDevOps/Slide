@@ -1,5 +1,3 @@
-
-
 <template>
   <header class="bg-white shadow-md p-4 flex justify-between items-center">
     <!-- App Name on the Left -->
@@ -38,7 +36,5 @@
   </header>
 
   <main class="px-8 py-6 bg-gray-100">
-
-    <RouterView/> 
-     </main>
+  </main>
 </template>
