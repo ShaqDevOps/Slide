@@ -10,12 +10,13 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
+import os
 from pathlib import Path
 from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
+print(BASE_DIR)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
@@ -27,6 +28,11 @@ SECRET_KEY = 'django-insecure-)c$9h+hyi)73&vj%&fh9qt^)4oev4ow*o@m2e1e^xl%_@!ha=a
 DEBUG = True
 
 ALLOWED_HOSTS = []
+
+# media files will be uploaded here, replace this with an S3 bucket before you deploy
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 
 AUTH_USER_MODEL = 'core.User'
@@ -83,6 +89,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'djoser',
     'corsheaders',
+    'search',
     'post',
     'core',
     'user_profile'

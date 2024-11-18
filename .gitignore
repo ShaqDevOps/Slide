@@ -39,3 +39,7 @@ node_modules/
 # Testing
 .coverage
 htmlcov/
+
+
+#Misc Files
+additions.txt

@@ -11,7 +11,7 @@ class ProfileSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(source='user.email', read_only=True)
     username = serializers.CharField(source='user.username', read_only=True)
     name = serializers.CharField(source='user.name', read_only=True)
-    id = serializers.IntegerField(source='user.id', read_only=True)
+    id = serializers.CharField(source='user.id', read_only=True)
     followers = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     blocked_users = serializers.PrimaryKeyRelatedField(
         many=True, read_only=True)
@@ -25,7 +25,7 @@ class ProfileSerializer(serializers.ModelSerializer):
             'bio',
             'profile_picture',
             'email',
-            # 'location',
+            'state',
             'website',
             'followers',
             'created_at',
@@ -36,3 +36,9 @@ class ProfileSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['user', 'created_at', 'is_active',
                             'last_seen', 'followers', 'blocked_users']
+
+        def to_representation(self, instance):
+            representation = super().to_representation(instance)
+            representation['id'] = str(
+                instance.user.id)  # Ensure id is a string
+            return representation

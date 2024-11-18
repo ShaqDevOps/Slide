@@ -90,7 +90,7 @@ export default {
 
                         // Fetch user info
                         const userResponse = await axios.get("/me");
-                        this.userStore.setUserInfo(userResponse.data); // Assuming setUserInfo is defined
+                        this.userStore.setUserInfo(userResponse.data);
 
                         // Redirect to feed
                         this.$router.push("/feed");

@@ -12,7 +12,7 @@
     </div>
     <!-- Centered Navigation Links -->
     <nav class="menu-center flex space-x-12" v-if="userStore.user.isAuthenticated">
-      <a href="#" class="flex flex-col items-center hover:text-blue-500">
+      <a href="/feed" class="flex flex-col items-center hover:text-blue-500">
         <i class="fas fa-home text-xl"></i>
         <span class="text-sm">Home</span>
       </a>
@@ -34,11 +34,11 @@
     <!-- Profile Picture Placeholder on the Right -->
     <div class="menu-right">
       <template v-if="userStore.user.isAuthenticated">
+        <RouterLink :to="{ name: 'profile', params: { id: userStore.user.id } }">
+          <div class="w-10 h-10 rounded-full bg-gray-300 overflow-hidden">
 
-        <div class="w-10 h-10 rounded-full bg-gray-300 overflow-hidden">
-          <!-- Replace with an image -->
-          <img src="./assets/cat.jpg" class="w-full h-full object-cover">
-        </div>
+          </div>
+        </RouterLink>
       </template>
 
       <template v-else>
