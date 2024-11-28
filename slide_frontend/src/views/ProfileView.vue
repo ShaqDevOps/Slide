@@ -11,14 +11,24 @@
 
                 <!-- Username -->
                 <div class="mt-4">
-                    <p class="text-lg font-semibold">{{ userStore.user.username }}</p>
+                    <p class="text-lg font-semibold">{{ profile.username }}</p>
                 </div>
 
                 <!-- Followers and Posts -->
                 <div class="mt-4 flex justify-around text-gray-500">
-                    <p class="text-sm"><strong>180</strong> friends</p>
+                    <RouterLink :to="{ name: 'friends', params: { id: $route.params.id } }" class="text-sm">
+                        <strong>180</strong>
+                        friends
+                    </RouterLink>
                     <p class="text-sm"><strong>{{ posts.length }}</strong> posts</p>
                 </div>
+                <div class="mt-6">
+                    <button class="inline-block py-4 px-6 bg-purple-600 text-white rounded-lg"
+                        @click="sendFriendRequest">Add
+                        Friend</button>
+                </div>
+
+
             </div>
         </div>
 
@@ -107,19 +117,69 @@ export default {
     },
     data() {
         return {
+
+
             form: {
                 body: "",
             },
+
+            profile: '',
             posts: [],
-            liked: false, // Added for like functionality
-            showMenu: false, // Added for dropdown menu
-            errors: [], // Added for error handling
+            liked: false, // like functionality
+            showMenu: false, // dropdown menu on posts
+            errors: [], // error handling
         };
     },
     mounted() {
-        this.getMyPosts(); // Fetch posts when the component mounts
+
+
+        const userIdFromUrl = this.$route.params.id; //store the id passed by vue Router
+        this.fetchPosts(userIdFromUrl);
+
+        this.getProfile(userIdFromUrl)
+
+
     },
     methods: {
+
+
+
+
+        async fetchPosts(userId) {
+            try {
+                const loggedInUserId = this.userStore.user.id
+
+                if (userId === loggedInUserId) {
+
+                    await this.getMyPosts();
+                } else {
+
+                    await this.getUserPosts(userId);
+
+                }
+
+            } catch (error) {
+                console.error("Error determining which posts fetch", error);
+            }
+
+        },
+
+        async getUserPosts(userId) {
+            try {
+
+
+                const response = await axios.get(`/posts/?user=${userId}`);
+                this.posts = response.data;
+                console.log(this.posts)
+            } catch (error) {
+                console.error('Error fetching posts: ', error);
+            }
+        },
+
+
+
+
+
         async getMyPosts() {
             try {
                 const response = await axios.get('/posts/?user=me'); // Backend filters for user posts
@@ -128,6 +188,23 @@ export default {
                 console.error('Error fetching posts:', error);
             }
         },
+
+
+        async getProfile(userId) {
+
+            try {
+                const response = await axios.get(`profiles/${userId}`)
+                console.log(userId)
+                this.profile = response.data
+                console.log(this.profile)
+            } catch (error) {
+                console.error('Error fetching profile: ', error)
+            }
+        },
+
+
+
+
         async submitPost() {
             this.errors = []; // Clear errors before submitting
             try {
@@ -145,6 +222,8 @@ export default {
                 }
             }
         },
+
+
         toggleLike(postId) {
             // Logic for toggling like status
             this.liked = !this.liked;
@@ -153,6 +232,25 @@ export default {
         toggleMenu() {
             this.showMenu = !this.showMenu;
         },
+
+
+        sendFriendRequest() {
+            axios.post(`profiles/${this.$route.params.id}/friends/request/`).then(response => {
+                console.log('data', response.data)
+            }).catch(error => {
+                console.log('error', error)
+
+
+            })
+        }
+
     },
+
+
+
+
 };
+
+
+
 </script>

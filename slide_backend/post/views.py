@@ -16,7 +16,11 @@ class PostViewSet(viewsets.ModelViewSet):
         user_param = self.request.query_params.get('user', None)
         if user_param == 'me':
             return Post.objects.filter(created_by=self.request.user).select_related('created_by', 'created_by__profile')
-        # Otherwise, return all posts
+
+        elif user_param:
+            return Post.objects.filter(created_by__id=user_param).select_related('created_by', 'created_by__profile')
+
+            # Otherwise, return all posts
         return Post.objects.all().select_related('created_by', 'created_by__profile')
     serializer_class = PostSerializer
     permission_classes = [IsAuthenticated]

@@ -25,7 +25,7 @@ urlpatterns = [
     path('auth/', include('djoser.urls.jwt')),
     path('', include('post.urls')),
     path('', include('user_profile.urls')),
-    path('search/', include('search.urls'))
+    path('search', include('search.urls'))
 
 ]
 

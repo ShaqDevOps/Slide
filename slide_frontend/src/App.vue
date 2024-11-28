@@ -34,11 +34,15 @@
     <!-- Profile Picture Placeholder on the Right -->
     <div class="menu-right">
       <template v-if="userStore.user.isAuthenticated">
-        <RouterLink :to="{ name: 'profile', params: { id: userStore.user.id } }">
-          <div class="w-10 h-10 rounded-full bg-gray-300 overflow-hidden">
 
-          </div>
-        </RouterLink>
+        <div @click="handleProfileClick">
+          <RouterLink :to="{ name: 'profile', params: { id: userStore.user.id } }">
+            <div class="w-10 h-10 rounded-full bg-gray-300 overflow-hidden">
+
+            </div>
+          </RouterLink>
+
+        </div>
       </template>
 
       <template v-else>
@@ -67,7 +71,6 @@
 <script>
 import axios from "axios";
 import { RouterView } from "vue-router";
-import HomeView from "@/views/HomeView.vue";
 import Toast from "@/components/Toast.vue";
 import { useUserStore } from "@/stores/user";
 
@@ -82,6 +85,7 @@ export default {
   },
 
   beforeCreate() {
+    // Initialize the store and set the default Authorization header
     this.userStore.initStore();
 
     const token = this.userStore.user?.access;
@@ -90,6 +94,24 @@ export default {
     } else {
       axios.defaults.headers.common["Authorization"] = "";
     }
+  },
+
+  methods: {
+    handleProfileClick() {
+      const profileRoute = { name: "profile", params: { id: this.userStore.user.id } };
+
+      if (this.$route.name === "profile" && this.$route.params.id === this.userStore.user.id) {
+        // Force a reload of the same route
+        this.$router.replace({
+          path: '/posts/?user=me'
+        }).then(() => {
+          this.$router.replace(profileRoute);
+        });
+      } else {
+        // Navigate to the profile route normally
+        this.$router.push(profileRoute);
+      }
+    },
   },
 };
 </script>
