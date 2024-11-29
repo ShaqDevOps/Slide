@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  mysql:
+    command: --sql-mode="STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION"
+    image: mysql:8.0
+    container_name: slide_mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  backend:
+    build:
+      context: ./slide_backend
+    container_name: slide_backend
+    restart: always
+    env_file: .env
+    depends_on:
+      - mysql
+    ports:
+      - "8000:8000"
+    environment:
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+      DJANGO_DEBUG: ${DJANGO_DEBUG}
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS}
+
+  frontend:
+    build:
+      context: ./slide_frontend
+    container_name: slide_frontend
+    restart: always
+    ports:
+      - "3000:3000"
+
+volumes:
+  mysql_data:

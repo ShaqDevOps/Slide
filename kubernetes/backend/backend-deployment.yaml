@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: slide-backend
+  namespace: slide
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: slide-backend
+  template:
+    metadata:
+      labels:
+        app: slide-backend
+    spec:
+      containers:
+      - name: backend
+        image: shaqdevops/slide_backend:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8000
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: slide-database-secret
+              key: database_url
+        - name: DEBUG
+        
+          value: "False"

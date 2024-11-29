@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: slide-frontend
+  namespace: slide
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: slide-frontend
+  template:
+    metadata:
+      labels:
+        app: slide-frontend
+    spec:
+      containers:
+      - name: frontend
+        image: shaqdevops/slide_frontend:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3000

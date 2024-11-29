@@ -14,25 +14,38 @@ import os
 from pathlib import Path
 from datetime import timedelta
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+
+# Base directory
 BASE_DIR = Path(__file__).resolve().parent.parent
-print(BASE_DIR)
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
+# Secret key
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'fallback-secret-key')  # Use a fallback for local development.
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-)c$9h+hyi)73&vj%&fh9qt^)4oev4ow*o@m2e1e^xl%_@!ha=a'
+# Debug mode
+DEBUG = os.getenv('DJANGO_DEBUG', 'True') == 'True'
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# Allowed hosts
+ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', 'localhost').split(',')
 
-ALLOWED_HOSTS = []
+# Database configuration
+DATABASES = {
+    'default': {
+         'ENGINE': 'django.db.backends.mysql',
+        'NAME': os.getenv('DB_NAME', 'default_db'),
+        'USER': os.getenv('DB_USER', 'default_user'),
+        'PASSWORD': os.getenv('DB_PASSWORD', 'default_password'),
+        'HOST': os.getenv('DB_HOST', 'localhost'),
+        'PORT': os.getenv('DB_PORT', '3306'),
+    }
+}
 
 # media files will be uploaded here, replace this with an S3 bucket before you deploy
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+STATIC_URL = '/static/' 
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
 
 
 AUTH_USER_MODEL = 'core.User'
@@ -67,14 +80,22 @@ REST_FRAMEWORK = {
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://localhost:5174",
-    'http://127.0.0.1'
+    "http://localhost:3000",
+    'http://127.0.0.1:3000'
 ]
 
 CSRF_ALLOWED_ORIGINS = [
     "http://localhost:5173",
-    "http://localhost:5174",
-    'http://127.0.0.1'
+    "http://localhost:5174"
+    "http://localhost:3000",
+    'http://127.0.0.1:3000'
 ]
+
+
+
+
+
+
 
 
 # Application definition
@@ -127,16 +148,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'slide_backend.wsgi.application'
 
-
-# Database
-# https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
 
 
 # Password validation
