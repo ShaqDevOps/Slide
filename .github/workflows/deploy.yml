@@ -30,12 +30,12 @@ jobs:
 
     - name: Build and Push Backend Image
       run: |
-        docker build -t ${{ secrets.DOCKER_USERNAME }}/slide_backend ./backend
+        docker build -t ${{ secrets.DOCKER_USERNAME }}/slide_backend ./slide_backend
         docker push ${{ secrets.DOCKER_USERNAME }}/slide_backend
 
     - name: Build and Push Frontend Image
       run: |
-        docker build -t ${{ secrets.DOCKER_USERNAME }}/slide_frontend ./frontend
+        docker build -t ${{ secrets.DOCKER_USERNAME }}/slide_frontend ./slide_frontend
         docker push ${{ secrets.DOCKER_USERNAME }}/slide_frontend
 
     - name: Deploy to Kubernetes
