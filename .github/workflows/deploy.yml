@@ -89,6 +89,7 @@ jobs:
           kubectl patch deployment slide-backend -n slide -p "{\"spec\":{\"template\":{\"metadata\":{\"annotations\":{\"date\":\"$(date +%s)\"}}}}}"
           kubectl patch deployment slide-frontend -n slide -p "{\"spec\":{\"template\":{\"metadata\":{\"annotations\":{\"date\":\"$(date +%s)\"}}}}}"
 
+          
           # Check rollout status
           kubectl rollout status deployment/slide-backend -n slide
           kubectl rollout status deployment/slide-frontend -n slide
