@@ -35,7 +35,7 @@
 
 
             <div class="mt-6 flex space-x-8 justify-around">
-              <p class="text-xs text-gray-500">180 Followers</p>
+              <p class="text-xs text-gray-500">{{user.friends_count}} Followers</p>
               <p class="text-xs text-gray-500">120 Posts</p>
 
             </div>

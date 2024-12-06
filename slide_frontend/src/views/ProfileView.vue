@@ -16,17 +16,19 @@
 
                 <!-- Followers and Posts -->
                 <div class="mt-4 flex justify-around text-gray-500">
-                    <RouterLink :to="{ name: 'friends', params: { id: $route.params.id } }" class="text-sm">
-                        <strong>180</strong>
-                        friends
-                    </RouterLink>
-                    <p class="text-sm"><strong>{{ posts.length }}</strong> posts</p>
-                </div>
-                <div class="mt-6">
-                    <button class="inline-block py-4 px-6 bg-purple-600 text-white rounded-lg"
-                        @click="sendFriendRequest">Add
-                        Friend</button>
-                </div>
+    <RouterLink :to="{ name: 'friends', params: { id: $route.params.id } }" class="text-sm">
+        <strong>{{ profile.friends_count }}</strong>
+        friends
+    </RouterLink>
+    <p class="text-sm">
+        <strong>{{ posts.length }}</strong> posts
+    </p>
+</div>
+<div class="mt-6" v-if="isNotOwnProfile">
+    <button class="inline-block py-4 px-6 bg-purple-600 text-white rounded-lg"
+        @click="sendFriendRequest">Add Friend</button>
+</div>
+
 
 
             </div>
@@ -104,6 +106,7 @@ import { ref } from 'vue';
 import PeopleYouMayKnow from '@/components/PeopleYouMayKnow.vue';
 import Trends from '@/components/Trends.vue';
 import { useUserStore } from "@/stores/user";
+import { useToastStore } from '@/stores/toast';
 
 export default {
     name: 'FeedView',
@@ -113,11 +116,16 @@ export default {
     },
     setup() {
         const userStore = useUserStore();
-        return { userStore };
+        const toastStore = useToastStore();
+
+
+        return { userStore,
+            toastStore
+         };
+
     },
     data() {
         return {
-
 
             form: {
                 body: "",
@@ -139,6 +147,17 @@ export default {
         this.getProfile(userIdFromUrl)
 
 
+    },
+
+    computed: {
+        loggedInUserId() {
+            // Retrieve the logged-in user's ID from localStorage or Vuex store
+            return localStorage.getItem('user.id') || this.$store.state.UserStore.id;
+        },
+        isNotOwnProfile() {
+            // Determine if the current profile is not the logged-in user's profile
+            return this.profile && this.profile.id !== this.loggedInUserId;
+        },
     },
     methods: {
 
@@ -184,6 +203,7 @@ export default {
             try {
                 const response = await axios.get('/posts/?user=me'); // Backend filters for user posts
                 this.posts = response.data;
+                console.log(this.posts)
             } catch (error) {
                 console.error('Error fetching posts:', error);
             }
@@ -235,8 +255,18 @@ export default {
 
 
         sendFriendRequest() {
-            axios.post(`profiles/${this.$route.params.id}/friends/request/`).then(response => {
+            axios.post(`profiles/${this.$route.params.id}/friends/request/send/`).then(response => {
                 console.log('data', response.data)
+
+                            
+            if (response.data.message == 'Request already sent'){
+                this.toastStore.showToast(5000, 'The request has already been sent', 'bg-red-300');
+            }
+            else{
+                this.toastStore.showToast(5000, 'Friend request was sent', 'bg-green-300');
+
+
+            }
             }).catch(error => {
                 console.log('error', error)
 

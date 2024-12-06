@@ -12,16 +12,32 @@ from django.http import JsonResponse
 
 class PostViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
-        # Check if the 'user' query parameter is set to 'me'
+        # Get the 'user' query parameter
         user_param = self.request.query_params.get('user', None)
+
         if user_param == 'me':
-            return Post.objects.filter(created_by=self.request.user).select_related('created_by', 'created_by__profile')
+            # Posts created by the logged-in user
+            return Post.objects.filter(
+                created_by=self.request.user
+            ).select_related('created_by', 'created_by__profile')
+
+        elif user_param == 'friends':
+            # Get posts by friends of the logged-in user
+            user_profile = self.request.user.profile  # Get the logged-in user's profile
+            friends = user_profile.friends.values_list('user__id', flat=True)  # Get the IDs of friends
+            return Post.objects.filter(
+                created_by__id__in=friends
+            ).select_related('created_by', 'created_by__profile')
 
         elif user_param:
-            return Post.objects.filter(created_by__id=user_param).select_related('created_by', 'created_by__profile')
+            # Posts created by a specific user (by ID)
+            return Post.objects.filter(
+                created_by__id=user_param
+            ).select_related('created_by', 'created_by__profile')
 
-            # Otherwise, return all posts
+        # Default: Return all posts
         return Post.objects.all().select_related('created_by', 'created_by__profile')
+
     serializer_class = PostSerializer
     permission_classes = [IsAuthenticated]
     http_method_names = ['get', 'post', 'patch', 'delete', 'head', 'options']

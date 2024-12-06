@@ -45,97 +45,134 @@ class ProfileDetailView(generics.RetrieveAPIView):
 
 @api_view(['POST'])
 def send_friend_request(request, pk):
+    try:
+        # Get the receiver's User instance
+        receiver = User.objects.get(id=pk)
 
-    receiving_user_id = pk
+        # Get the sender's User instance (currently logged-in user)
+        sender = request.user
 
-    receiving_user = User.objects.get(id=receiving_user_id)
-    sending_user = request.user
+        # Check if a FriendRequest already exists between sender and receiver
+        existing_request = FriendRequest.objects.filter(
+            sender=sender, receiver=receiver
+        ).exists() or FriendRequest.objects.filter(
+            sender=receiver, receiver=sender
+        ).exists()
 
-    FriendRequest.objects.create(
-        receiver=receiving_user, sender=sending_user)
+        if not existing_request:
+            # Create the FriendRequest instance
+            FriendRequest.objects.create(
+                sender=sender,
+                receiver=receiver,
+                status=FriendRequest.SENT
+            )
+            return JsonResponse({'message': 'Friend Request Sent'}, status=201)
+        else:
+            # Use a 409 Conflict status code to indicate a logical conflict
+            return JsonResponse({'message': 'Request already sent'})
+    except User.DoesNotExist:
+        # Return 404 if the receiver does not exist
+        return JsonResponse({'error': 'User not found'}, status=404)
+    except Exception as e:
+        # Catch all other exceptions and return a 500 status
+        print(f"Unexpected error: {str(e)}")
+        return JsonResponse({'error': str(e)}, status=500)
 
-    return JsonResponse({'message': 'Friend Request Sent'})
 
-
-api_view(['GET'])
-
-
+@api_view(['GET'])
 def friends_list(request, id):
-    user = User.objects.get(id=id)
-    profile = Profile.objects.get(user=user)
+    try:
+        # Get the user instance
+        user = User.objects.get(id=id)
 
-    friends = profile.friends
+        # Retrieve the user's friends
+        friends = user.profile.friends.all()
 
-    friends = ProfileSerializer(friends, many=True)
-    print(friends)
+        # Serialize the friends
+        friends_serializer = ProfileSerializer(friends, many=True)
 
-    return JsonResponse({'friends': friends.data})
+        return JsonResponse({'friends': friends_serializer.data}, status=200)
+    except User.DoesNotExist:
+        return JsonResponse({'error': 'User not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
 
 
 @api_view(['PATCH'])
 def friend_request_response(request):
-    print('friend_request id received: ', request.data.get('id'))
+    try:
+        # Fetch the FriendRequest using the provided ID
+        friend_request = get_object_or_404(FriendRequest, id=request.data.get('id'))
 
-    if request.method == 'PATCH':
-        try:
-            # Fetch status from the payload
-            request_status = request.data.get('request_status')
-            print('Request status received:', request_status)  # Debugging log
-            if not request_status or request_status not in ['accept', 'ignore']:
-                return Response({"error": "Invalid status"}, status=status.HTTP_400_BAD_REQUEST)
+        # Get the status from the request
+        request_status = request.data.get('request_status')
+        if request_status not in ['accept', 'ignore']:
+            return Response({"error": "Invalid status"}, status=400)
 
-            # Process the status (accept or ignore)
-            # Grab 'id' that is passed in payload
-            friend_request = get_object_or_404(
-                FriendRequest, id=request.data.get('id'))
+        if request_status == 'accept':
+            friend_request.status = FriendRequest.ACCEPTED
 
-            # Update the status based on the request
-            if request_status == 'accept':
-                friend_request.status = FriendRequest.ACCEPTED
+            # Access profiles of sender and receiver
+            sender_profile = friend_request.sender.profile
+            receiver_profile = friend_request.receiver.profile
 
-                # Add the users to eachother's friends lit
-                friend_request.receiver.profile.friends.add(
-                    friend_request.sender.profile)
+            # Add each other to the friends list
+            sender_profile.friends.add(receiver_profile)
+            receiver_profile.friends.add(sender_profile)
 
-                friend_request.sender.profile.friends.add(
-                    friend_request.receiver.profile)
+        elif request_status == 'ignore':
+            friend_request.status = FriendRequest.REJECTED
 
-            elif request_status == 'ignore':
-                friend_request.status = FriendRequest.REJECTED
-            friend_request.save()
+        # Save the updated FriendRequest
+        friend_request.save()
 
-            # Log updated status
-            print('Updated FriendRequest:', friend_request.status)
+        return Response({"message": f"Request {request_status}ed successfully"}, status=200)
 
-            return Response({"message": f"Request {request_status}ed successfully"}, status=status.HTTP_200_OK)
-        except Exception as e:
-            print('Exception occurred:', str(e))  # Debugging log for exception
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    except FriendRequest.DoesNotExist:
+        return Response({"error": "Friend request not found"}, status=404)
+    except Exception as e:
+        # Log unexpected error for debugging
+        print(f"Unexpected error: {str(e)}")
+        return Response({"error": str(e)}, status=500)
+
 
 
 @api_view(['GET'])
 def friends(request, pk):
-    profile = Profile.objects.get(user_id=pk)
-    signed_in_user = request.user
-    user = profile.user
-    requests = []
+    try:
+        # Get the user instance
 
-    # If the user is the signed-in user, get their friend requests
-    if user == signed_in_user:
-        friend_requests = FriendRequest.objects.filter(receiver=signed_in_user)
-        requests_serializer = FriendRequestSerializer(
-            friend_requests, many=True)
-        requests = requests_serializer.data  # Convert to list of serialized data
+        user = User.objects.get(id=pk)
 
-    # Get friends and serialize
-    friends = profile.friends.all()
-    friends_serializer = ProfileSerializer(friends, many=True)
+        # Get the user's profile
 
-    # Debugging print statement
-    print(f'{friends_serializer.data} + {requests}')
+        profile = user.profile
 
-    # Combine friends and requests in a single dictionary
-    return JsonResponse({
-        'friends': friends_serializer.data,  # List of serialized friends
-        'requests': requests  # List of serialized friend requests
-    }, safe=False)
+        # Fetch friends through the profile
+        friends = profile.friends.all()
+
+        # Serialize friends
+        friends_serializer = ProfileSerializer(friends, many=True)
+
+        # Fetch friend requests if the logged-in user is viewing their own profile
+        requests = []
+        if user == request.user:
+            friend_requests = FriendRequest.objects.filter(
+                receiver=request.user, status=FriendRequest.SENT
+            )
+            requests_serializer = FriendRequestSerializer(friend_requests, many=True)
+            requests = requests_serializer.data
+
+        # Combine friends and requests
+        return JsonResponse({
+            'friends': friends_serializer.data,
+            'requests': requests
+        }, safe=False)
+
+    except User.DoesNotExist:
+        print("User not found")
+        return JsonResponse({'error': 'User not found'}, status=404)
+
+    except Exception as e:
+        print(f"Unexpected error: {str(e)}")
+        return JsonResponse({'error': str(e)}, status=500)

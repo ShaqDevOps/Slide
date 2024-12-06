@@ -13,28 +13,35 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 import os
 from pathlib import Path
 from datetime import timedelta
-
+from dotenv import load_dotenv
 
 # Base directory
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+
+
+dotenv_path = BASE_DIR / '.env'
+if dotenv_path.exists():
+    load_dotenv(dotenv_path)
+
 # Secret key
-SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'fallback-secret-key')  # Use a fallback for local development.
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'fallback-secret-key')
 
 # Debug mode
-DEBUG = os.getenv('DJANGO_DEBUG', 'True') == 'True'
+DEBUG = os.getenv('DJANGO_DEBUG', 'False') == 'True'
 
 # Allowed hosts
-ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', 'localhost').split(',')
+ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', '127.0.0.1').split(',')
+
 
 # Database configuration
 DATABASES = {
     'default': {
-         'ENGINE': 'django.db.backends.mysql',
+        'ENGINE': 'django.db.backends.mysql',
         'NAME': os.getenv('DB_NAME', 'default_db'),
         'USER': os.getenv('DB_USER', 'default_user'),
         'PASSWORD': os.getenv('DB_PASSWORD', 'default_password'),
-        'HOST': os.getenv('DB_HOST', 'localhost'),
+        'HOST': os.getenv('DB_HOST'),
         'PORT': os.getenv('DB_PORT', '3306'),
     }
 }
