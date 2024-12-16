@@ -25,6 +25,9 @@ class Comments(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     body = models.TextField(max_length=350, blank=True, null=True)
 
+    def created_at_formatted(self):
+        return timesince(self.created_at)
+
 
 class Post(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

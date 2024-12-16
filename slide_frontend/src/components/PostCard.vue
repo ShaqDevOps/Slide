@@ -2,11 +2,15 @@
     <div class="post-container bg-white rounded-lg shadow-md p-4 w-full">
         <!-- Post Header -->
         <div class="flex items-center space-x-3 mb-4">
-            <div class="w-14 h-14 rounded-full bg-gray-300 overflow-hidden">
-                <img :src="post.created_by.profile_picture || '/default-avatar.png'" alt="Profile Picture"
+            <!-- Profile Picture Linked to Profile -->
+            <router-link :to="{ name: 'profile', params: { id: post.created_by?.id } }"
+                class="w-14 h-14 rounded-full bg-gray-300 overflow-hidden">
+                <img :src="post.created_by?.profile_picture || '/default-avatar.png'" alt="Profile Picture"
                     class="w-full h-full object-cover" />
-            </div>
-            <p class="text-gray-700 text-lg font-semibold">{{ post.created_by.username }}</p>
+            </router-link>
+
+            <!-- Username -->
+            <p class="text-gray-800 font-semibold">{{ post.created_by?.username || 'Anonymous' }}</p>
         </div>
 
         <!-- Post Content -->
@@ -24,14 +28,15 @@
                 <!-- Like Button -->
                 <button @click="toggleLike" class="text-gray-600 hover:text-red-500 flex items-center space-x-1">
                     <i :class="['fas', 'fa-heart', { 'text-red-500': post.liked }]"></i>
-                    <span>{{ post.likes_count }} Likes</span>
+                    <span>{{ post.likes_count }}</span>
                 </button>
 
                 <!-- Comment Button -->
-                <button @click="openComments" class="text-gray-600 hover:text-blue-500 flex items-center space-x-1">
+                <router-link :to="{ name: 'post-detail', params: { id: post.id } }"
+                    class="text-gray-600 hover:text-blue-500 flex items-center space-x-1">
                     <i class="fas fa-comment"></i>
-                    <span>{{ post.comments_count || 0 }} Comments</span>
-                </button>
+                    <span>{{ post.comments_count || 0 }}</span>
+                </router-link>
             </div>
 
             <!-- Menu Button -->
@@ -52,9 +57,6 @@ export default {
         toggleLike() {
             this.$emit("likeToggled", this.post.id);
         },
-        openComments() {
-            this.$emit("commentClicked", this.post.id);
-        },
     },
 };
 </script>
@@ -64,14 +66,11 @@ export default {
     width: 100%;
     max-width: 100%;
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-    /* Soft shadow for box effect */
     border: 1px solid #e2e8f0;
-    /* Light gray border for structure */
 }
 
 .aspect-video {
     aspect-ratio: 16 / 9;
-    /* Makes content look like a big media box */
     background-color: #f7fafc;
 }
 

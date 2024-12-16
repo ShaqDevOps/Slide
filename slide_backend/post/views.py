@@ -10,6 +10,7 @@ from core.models import User
 from django.http import JsonResponse
 from rest_framework.decorators import api_view
 from django.shortcuts import get_object_or_404
+from django.views.decorators.csrf import csrf_exempt
 
 
 class PostViewSet(viewsets.ModelViewSet):
@@ -42,7 +43,6 @@ class PostViewSet(viewsets.ModelViewSet):
         return Post.objects.all().select_related('created_by', 'created_by__profile')
 
     serializer_class = PostSerializer
-    permission_classes = [IsAuthenticated]
     http_method_names = ['get', 'post', 'patch', 'delete', 'head', 'options']
     # To handle both JSON and form data
     parser_classes = [JSONParser, FormParser, MultiPartParser]
@@ -102,9 +102,8 @@ def post_like(request, pk):
     }, status=status.HTTP_200_OK)
 
 
-api_view(['POST'])
-
-
+@csrf_exempt
+@api_view(['POST'])
 def post_comment(request, pk):
     # Get the post or return a 404 if not found
     post = get_object_or_404(Post, pk=pk)

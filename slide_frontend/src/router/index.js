@@ -7,6 +7,7 @@ import MessageView from "@/views/MessageView.vue";
 import SearchView from "@/views/SearchView.vue";
 import ProfileView from "@/views/ProfileView.vue";
 import FriendsView from "@/views/FriendsView.vue";
+import PostDetailView from "@/views/PostDetailView.vue"; // Import the PostDetail component
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -37,6 +38,11 @@ const router = createRouter({
       component: FeedView,
     },
     {
+      path: "/posts/:id", // New route for post details
+      name: "post-detail",
+      component: PostDetailView,
+    },
+    {
       path: "/login",
       name: "login",
       component: LogInView,
@@ -54,9 +60,6 @@ const router = createRouter({
     {
       path: "/about",
       name: "about",
-      // route level code-splitting
-      // this generates a separate chunk (About.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
       component: () => import("../views/AboutView.vue"),
     },
   ],
