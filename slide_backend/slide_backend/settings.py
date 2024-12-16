@@ -19,7 +19,6 @@ from dotenv import load_dotenv
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-
 dotenv_path = BASE_DIR / '.env'
 if dotenv_path.exists():
     load_dotenv(dotenv_path)
@@ -50,9 +49,8 @@ DATABASES = {
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-STATIC_URL = '/static/' 
+STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-
 
 
 AUTH_USER_MODEL = 'core.User'
@@ -61,6 +59,8 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=30),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=180),
     'ROTATE_REFRESH_TOKENS': False,
+    'BLACKLIST_AFTER_ROTATION': True,
+
     'AUTH_HEADER_TYPES': ('JWT',),
 }
 
@@ -99,12 +99,6 @@ CSRF_ALLOWED_ORIGINS = [
 ]
 
 
-
-
-
-
-
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -114,6 +108,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework_simplejwt.token_blacklist',
     'rest_framework',
     'djoser',
     'corsheaders',
@@ -154,7 +149,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'slide_backend.wsgi.application'
-
 
 
 # Password validation

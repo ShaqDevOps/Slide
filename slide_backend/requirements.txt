@@ -23,3 +23,5 @@ sqlparse==0.5.2
 urllib3==2.2.3
 Pillow
 gunicorn
+pymysql==1.4.6
+python-dotenv

@@ -16,20 +16,26 @@
 
                 <!-- Followers and Posts -->
                 <div class="mt-4 flex justify-around text-gray-500">
-    <RouterLink :to="{ name: 'friends', params: { id: $route.params.id } }" class="text-sm">
-        <strong>{{ profile.friends_count }}</strong>
-        friends
-    </RouterLink>
-    <p class="text-sm">
-        <strong>{{ posts.length }}</strong> posts
-    </p>
-</div>
-<div class="mt-6" v-if="isNotOwnProfile">
-    <button class="inline-block py-4 px-6 bg-purple-600 text-white rounded-lg"
-        @click="sendFriendRequest">Add Friend</button>
-</div>
+                    <RouterLink :to="{ name: 'friends', params: { id: $route.params.id } }" class="text-sm">
+                        <strong>{{ profile.friends_count }}</strong>
+                        friends
+                    </RouterLink>
+                    <p class="text-sm">
+                        <strong>{{ posts.length }}</strong> posts
+                    </p>
+                </div>
+                <div v-if="isNotFriend">
 
+                    <div class="mt-6" v-if="isNotOwnProfile">
+                        <button class="inline-block py-4 px-6 bg-purple-600 text-white rounded-lg"
+                            @click="sendFriendRequest">Add Friend</button>
+                    </div>
 
+                </div>
+                <div class="mt-6" v-if="isOwnProfile">
+                    <button class="inline-block py-4 px-6 bg-red-600 text-white rounded-lg"
+                        @click="logout">Logout</button>
+                </div>
 
             </div>
         </div>
@@ -119,9 +125,10 @@ export default {
         const toastStore = useToastStore();
 
 
-        return { userStore,
+        return {
+            userStore,
             toastStore
-         };
+        };
 
     },
     data() {
@@ -158,6 +165,17 @@ export default {
             // Determine if the current profile is not the logged-in user's profile
             return this.profile && this.profile.id !== this.loggedInUserId;
         },
+
+        isOwnProfile() {
+            return this.profile && this.profile.id === this.loggedInUserId;
+        },
+        isNotFriend() {
+            return (
+                this.profile &&
+                !this.profile.friends.some((friend) => friend.id === this.loggedInUserId)
+            );
+        },
+
     },
     methods: {
 
@@ -214,7 +232,7 @@ export default {
 
             try {
                 const response = await axios.get(`profiles/${userId}`)
-                console.log(userId)
+                console.log(response.data)
                 this.profile = response.data
                 console.log(this.profile)
             } catch (error) {
@@ -244,6 +262,23 @@ export default {
         },
 
 
+
+        async logout() {
+            this.errors = []
+            try {
+                const response = await axios.post('/logout/');
+                console.log(response.data)
+                this.userStore.removeToken()
+                this.$router.push('/login/')
+            } catch (error) {
+                if (error.response) {
+                    this.errors.push(error.response.data)
+                }
+            }
+
+
+        },
+
         toggleLike(postId) {
             // Logic for toggling like status
             this.liked = !this.liked;
@@ -258,15 +293,15 @@ export default {
             axios.post(`profiles/${this.$route.params.id}/friends/request/send/`).then(response => {
                 console.log('data', response.data)
 
-                            
-            if (response.data.message == 'Request already sent'){
-                this.toastStore.showToast(5000, 'The request has already been sent', 'bg-red-300');
-            }
-            else{
-                this.toastStore.showToast(5000, 'Friend request was sent', 'bg-green-300');
+
+                if (response.data.message == 'Request already sent') {
+                    this.toastStore.showToast(5000, 'The request has already been sent', 'bg-red-300');
+                }
+                else {
+                    this.toastStore.showToast(5000, 'Friend request was sent', 'bg-green-300');
 
 
-            }
+                }
             }).catch(error => {
                 console.log('error', error)
 

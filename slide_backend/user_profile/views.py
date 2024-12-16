@@ -10,6 +10,7 @@ from rest_framework.permissions import IsAuthenticated
 from core.models import User
 from .models import FriendRequest
 from rest_framework.decorators import api_view
+from rest_framework_simplejwt.tokens import RefreshToken
 
 
 class MeView(APIView):
@@ -38,7 +39,7 @@ class ProfileDetailView(generics.RetrieveAPIView):
     def get_queryset(self):
         # Get the lookup parameter from the URL
         profile_id = self.kwargs.get(self.lookup_url_kwarg)
-
+        
         # Return a filtered queryset
         return Profile.objects.filter(user__id=profile_id)
 
@@ -102,7 +103,8 @@ def friends_list(request, id):
 def friend_request_response(request):
     try:
         # Fetch the FriendRequest using the provided ID
-        friend_request = get_object_or_404(FriendRequest, id=request.data.get('id'))
+        friend_request = get_object_or_404(
+            FriendRequest, id=request.data.get('id'))
 
         # Get the status from the request
         request_status = request.data.get('request_status')
@@ -136,7 +138,6 @@ def friend_request_response(request):
         return Response({"error": str(e)}, status=500)
 
 
-
 @api_view(['GET'])
 def friends(request, pk):
     try:
@@ -160,7 +161,8 @@ def friends(request, pk):
             friend_requests = FriendRequest.objects.filter(
                 receiver=request.user, status=FriendRequest.SENT
             )
-            requests_serializer = FriendRequestSerializer(friend_requests, many=True)
+            requests_serializer = FriendRequestSerializer(
+                friend_requests, many=True)
             requests = requests_serializer.data
 
         # Combine friends and requests
@@ -176,3 +178,15 @@ def friends(request, pk):
     except Exception as e:
         print(f"Unexpected error: {str(e)}")
         return JsonResponse({'error': str(e)}, status=500)
+
+
+@api_view(['POST'])
+def logout_view(request):
+    try:
+        refresh_token = request.data.get("refresh")
+        if refresh_token:
+            token = RefreshToken(refresh_token)
+            token.blacklist()  # Add token to blacklist
+        return Response({"message": "Logout successful"}, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)

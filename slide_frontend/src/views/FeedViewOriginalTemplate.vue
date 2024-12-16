@@ -31,8 +31,7 @@
 
 
 
-        <div class="p-4 bg-white border border-gray-200 text-center rounded-lg" v-for="post in posts"
-          :key="post.id">
+        <div class="p-4 bg-white border border-gray-200 text-center rounded-lg" v-for="post in posts" :key="post.id">
 
           <div class="mb-6 flex items-center justify-between">
             <div class="flex items-center space-x-3">
@@ -175,13 +174,13 @@ export default {
         console.error('Error fetching posts:', error);
       }
     },
-// Fetch only friends posts
-    async getFriendsPosts(){
+    // Fetch only friends posts
+    async getFriendsPosts() {
 
       try {
         const response = axios.await.get('/posts/?user=friends');
         this.posts = response.data;
-      } catch (error){
+      } catch (error) {
         console.error('Error fetching posts:', error);
       }
     },
@@ -214,4 +213,3 @@ export default {
 };
 
 </script>
-
